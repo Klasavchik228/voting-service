@@ -17,12 +17,12 @@ public class VotingOption {
         private String votingId;
 
         @Column(name = "option_id")
-        private Short optionId;
+        private String optionId;
 
         public VotingOptionId() {
         }
 
-        public VotingOptionId(String votingId, Short optionId) {
+        public VotingOptionId(String votingId, String optionId) {
             this.votingId = votingId;
             this.optionId = optionId;
         }
@@ -45,7 +45,7 @@ public class VotingOption {
             return votingId;
         }
 
-        public Short getOptionId() {
+        public String getOptionId() {
             return optionId;
         }
     }

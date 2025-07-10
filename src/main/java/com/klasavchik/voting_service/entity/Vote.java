@@ -45,7 +45,7 @@ public class Vote {
     private VoteId id;
 
     @Column(name = "option_id", nullable = false)
-    private short optionId;
+    private String optionId;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
     private ZonedDateTime createdAt;

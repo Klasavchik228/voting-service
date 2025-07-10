@@ -6,6 +6,6 @@ import lombok.Data;
 public class VoteRequest {
     private String votingId;
     private String voterId;
-    private short optionId;
+    private String optionId;
     // Убран txHash
 }
