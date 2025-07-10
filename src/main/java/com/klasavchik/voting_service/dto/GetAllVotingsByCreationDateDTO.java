@@ -16,6 +16,6 @@ public class GetAllVotingsByCreationDateDTO {
         private String description;
         private ZonedDateTime startDate;
         private ZonedDateTime endDate;
-        private ZonedDateTime creationDate;
+        //private ZonedDateTime creationDate;
     }
 }

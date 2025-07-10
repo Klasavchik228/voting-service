@@ -99,16 +99,14 @@ public class KafkaConsumerService {
             List<VotingHistoryDTO> history = votes.stream()
                     .map(vote -> {
                         VotingHistoryDTO dto = new VotingHistoryDTO();
-                        dto.setVotingId(vote.getId().getVotingId());
-                        dto.setCastAt(vote.getCreatedAt());
-                        dto.setOptionId(vote.getOptionId());
+                        dto.setIsPrivate(vote.getVoting().isPrivate());
 
                         Voting voting = votingRepository.findByIdWithOptions(vote.getId().getVotingId())
                                 .orElseThrow(() -> new IllegalArgumentException("Голосование не найдено: " + vote.getId().getVotingId()));
                         dto.setTitle(voting.getTitle());
 
                         voting.getOptions().stream()
-                                .filter(option -> option.getId().getOptionId() == vote.getOptionId())
+                                .filter(option -> option.getId().getOptionId().equals(vote.getOptionId()))
                                 .findFirst()
                                 .ifPresent(option -> dto.setOptionText(option.getText()));
 
@@ -143,21 +141,27 @@ public class KafkaConsumerService {
 
             // Подсчёт голосов за каждый вариант
             List<Object[]> voteCounts = voteRepository.countVotesByOptionId(voting.getId());
-            Map<Short, Integer> voteCountMap = new HashMap<>();
+            Map<String, Integer> voteCountMap = new HashMap<>();
             for (Object[] result : voteCounts) {
-                voteCountMap.put((Short) result[1], ((Number) result[2]).intValue()); // optionId, voteCount
+                voteCountMap.put((String) result[1], ((Number) result[2]).intValue()); // optionId, voteCount
             }
 
+            // Подсчёт общего количества уникальных проголосовавших
+            List<Object[]> votersCounts = voteRepository.countVotersByVotingId();
+            int totalVoters = votersCounts.stream()
+                    .filter(result -> ((String) result[0]).equals(voting.getId()))
+                    .findFirst()
+                    .map(result -> ((Number) result[1]).intValue())
+                    .orElse(0);
+
             VotingResponseDTO responseDTO = new VotingResponseDTO();
-            responseDTO.setVotingId(voting.getId());
             responseDTO.setTitle(voting.getTitle());
             responseDTO.setDescription(voting.getDescription());
             responseDTO.setCreatorId(voting.getCreatorId());
-            responseDTO.setPrivate(voting.isPrivate());
             responseDTO.setMinVotes(voting.getMinVotes());
             responseDTO.setEndDate(voting.getEndDate());
-            responseDTO.setStartDate(voting.getStartDate()); // Обновлено
-            responseDTO.setCreationDate(voting.getCreationDate()); // Новое поле
+            responseDTO.setStartDate(voting.getStartDate());
+            responseDTO.setVoteCount(totalVoters);// Обновлено
             responseDTO.setOptions(voting.getOptions().stream()
                     .map(option -> {
                         VotingOptionDTO optionDTO = new VotingOptionDTO();
@@ -193,7 +197,6 @@ public class KafkaConsumerService {
                 dto.setDescription(voting.getDescription());
                 dto.setStartDate(voting.getStartDate());
                 dto.setEndDate(voting.getEndDate());
-                dto.setCreationDate(voting.getCreationDate());
                 return dto;
             }).collect(Collectors.toList()));
 
@@ -223,7 +226,6 @@ public class KafkaConsumerService {
                 dto.setDescription(voting.getDescription());
                 dto.setStartDate(voting.getStartDate());
                 dto.setEndDate(voting.getEndDate());
-                dto.setCreationDate(voting.getCreationDate());
                 return dto;
             }).collect(Collectors.toList()));
 

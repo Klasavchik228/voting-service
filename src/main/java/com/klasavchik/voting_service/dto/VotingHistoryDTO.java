@@ -6,10 +6,11 @@ import java.time.ZonedDateTime;
 
 @Data
 public class VotingHistoryDTO {
-    private String votingId;
-    private ZonedDateTime castAt;
-    private String optionId;
-    private String title;
-    private String optionText;
-    private int votersCount; // Количество проголосовавших по этому голосованию
+//    private String votingId;
+//    private ZonedDateTime castAt;
+//    private String optionId;
+    private String title;  //+
+    private String optionText;//+
+    private int votersCount; //+
+    private Boolean IsPrivate;
 }
