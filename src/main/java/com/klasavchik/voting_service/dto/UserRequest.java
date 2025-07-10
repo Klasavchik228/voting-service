@@ -4,6 +4,5 @@ import lombok.Data;
 
 @Data
 public class UserRequest {
-    private String id;
-    private String username;
+    private String userId; // Переименовано с id на userId для соответствия входящему JSON
 }

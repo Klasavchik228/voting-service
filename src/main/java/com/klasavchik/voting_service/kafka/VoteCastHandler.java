@@ -1,4 +1,4 @@
-package com.klasavchik.voting_service.kafka.consumer;
+package com.klasavchik.voting_service.kafka;
 
 import com.klasavchik.voting_service.dto.VoteRequest;
 import com.klasavchik.voting_service.entity.Vote;

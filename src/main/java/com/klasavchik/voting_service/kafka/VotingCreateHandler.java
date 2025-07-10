@@ -1,9 +1,8 @@
-package com.klasavchik.voting_service.kafka.consumer;
+package com.klasavchik.voting_service.kafka;
 
 import com.klasavchik.voting_service.dto.VotingCreateRequest;
 import com.klasavchik.voting_service.entity.Voting;
 import com.klasavchik.voting_service.entity.VotingOption;
-import com.klasavchik.voting_service.entity.VotingOption.VotingOptionId;
 import com.klasavchik.voting_service.repository.VotingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

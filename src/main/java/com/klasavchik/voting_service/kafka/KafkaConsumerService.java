@@ -1,16 +1,11 @@
-package com.klasavchik.voting_service.kafka.consumer;
+package com.klasavchik.voting_service.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.klasavchik.voting_service.dto.*;
 import com.klasavchik.voting_service.entity.Voting;
-import com.klasavchik.voting_service.entity.VotingOption;
-import com.klasavchik.voting_service.kafka.consumer.UserRegistrationHandler;
-import com.klasavchik.voting_service.kafka.consumer.VotingCreateHandler;
-import com.klasavchik.voting_service.kafka.consumer.VoteCastHandler;
 import com.klasavchik.voting_service.repository.VoteRepository;
 import com.klasavchik.voting_service.repository.VotingRepository;
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -28,14 +23,14 @@ public class KafkaConsumerService {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-    private final UserRegistrationHandler userRegistrationHandler;
+    private final com.klasavchik.voting_service.kafka.consumer.UserRegistrationHandler userRegistrationHandler;
     private final VotingCreateHandler votingCreateHandler;
     private final VoteCastHandler voteCastHandler;
     private final VoteRepository voteRepository;
     private final VotingRepository votingRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public KafkaConsumerService(UserRegistrationHandler userRegistrationHandler,
+    public KafkaConsumerService(com.klasavchik.voting_service.kafka.consumer.UserRegistrationHandler userRegistrationHandler,
                                 VotingCreateHandler votingCreateHandler,
                                 VoteCastHandler voteCastHandler,
                                 VoteRepository voteRepository,

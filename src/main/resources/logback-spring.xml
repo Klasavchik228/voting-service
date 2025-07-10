@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Appender для консоли с компактным и цветным выводом -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-5level %logger{15} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{HH:mm:ss} %highlight(%-5level) %cyan(%logger{15}) - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!-- Уровень логирования и привязка только к консоли -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- Опционально: детализация для твоего пакета -->
+    <logger name="com.klasavchik.voting_service" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+</configuration>
