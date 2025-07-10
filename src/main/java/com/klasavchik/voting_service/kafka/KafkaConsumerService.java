@@ -177,8 +177,8 @@ public class KafkaConsumerService {
         try {
             logger.info("Получен триггер для отправки списка всех голосований: {}", message);
 
-            // Получаем все голосования, отсортированные по startDate (от нового к старому)
-            List<Voting> votings = votingRepository.findAllOrderedByCreatedAt();
+            // Получаем последние 15 голосований, отсортированных по creationDate (от нового к старому)
+            List<Voting> votings = votingRepository.findLast15ByCreationDate();
 
             // Преобразуем в DTO
             GetAllVotingsByCreationDateDTO responseDTO = new GetAllVotingsByCreationDateDTO();
@@ -195,7 +195,7 @@ public class KafkaConsumerService {
 
             String responseJson = objectMapper.writeValueAsString(responseDTO);
             kafkaTemplate.send("all-votings-response", responseJson);
-            logger.info("Отправлен список всех голосований: {}", responseJson);
+            logger.info("Отправлен список последних 15 голосований: {}", responseJson);
         } catch (Exception e) {
             logger.error("Ошибка при обработке триггера для отправки всех голосований", e);
         }

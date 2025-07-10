@@ -11,9 +11,9 @@ public interface VotingRepository extends JpaRepository<Voting, String> {
     @Query("SELECT v FROM Voting v WHERE v.id = :id")
     Optional<Voting> findByIdWithOptions(String id);
 
-    @Query("SELECT v FROM Voting v ORDER BY v.startDate DESC") // Исправлено с createdAt на startDate
-    List<Voting> findAllOrderedByCreatedAt();
-
     @Query("SELECT v FROM Voting v ORDER BY v.creationDate DESC")
     List<Voting> findAllOrderedByCreationDate();
+
+    @Query("SELECT v FROM Voting v ORDER BY v.creationDate DESC LIMIT 15")
+    List<Voting> findLast15ByCreationDate();
 }
