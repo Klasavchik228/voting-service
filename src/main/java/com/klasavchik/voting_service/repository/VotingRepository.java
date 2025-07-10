@@ -16,4 +16,7 @@ public interface VotingRepository extends JpaRepository<Voting, String> {
 
     @Query("SELECT v FROM Voting v ORDER BY v.creationDate DESC LIMIT 15")
     List<Voting> findLast15ByCreationDate();
+
+    @Query("SELECT v FROM Voting v WHERE v.creatorId = ?1 ORDER BY v.creationDate DESC LIMIT 15")
+    List<Voting> findLast15ByCreatorId(String creatorId);
 }

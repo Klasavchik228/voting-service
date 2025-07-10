@@ -204,4 +204,34 @@ public class KafkaConsumerService {
             logger.error("Ошибка при обработке триггера для отправки всех голосований", e);
         }
     }
+    @Transactional
+    @KafkaListener(topics = "trigger-user-votings-request", groupId = "voting-group")
+    public void listenForUserVotingsRequest(String message) {
+        try {
+            logger.info("Получен запрос голосований пользователя: {}", message);
+            UserVotingsRequest request = objectMapper.readValue(message, UserVotingsRequest.class);
+
+            // Получаем последние 15 голосований, созданных пользователем
+            List<Voting> votings = votingRepository.findLast15ByCreatorId(request.getCreatorId());
+
+            // Преобразуем в DTO
+            GetAllVotingsByCreationDateDTO responseDTO = new GetAllVotingsByCreationDateDTO();
+            responseDTO.setVotings(votings.stream().map(voting -> {
+                GetAllVotingsByCreationDateDTO.VotingSummaryByCreationDTO dto = new GetAllVotingsByCreationDateDTO.VotingSummaryByCreationDTO();
+                dto.setId(voting.getId());
+                dto.setTitle(voting.getTitle());
+                dto.setDescription(voting.getDescription());
+                dto.setStartDate(voting.getStartDate());
+                dto.setEndDate(voting.getEndDate());
+                dto.setCreationDate(voting.getCreationDate());
+                return dto;
+            }).collect(Collectors.toList()));
+
+            String responseJson = objectMapper.writeValueAsString(responseDTO);
+            kafkaTemplate.send("user-votings-response", responseJson);
+            logger.info("Отправлен список последних 15 голосований пользователя: {}", responseJson);
+        } catch (Exception e) {
+            logger.error("Ошибка при обработке запроса голосований пользователя", e);
+        }
+    }
 }
