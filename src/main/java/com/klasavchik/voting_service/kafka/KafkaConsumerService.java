@@ -205,6 +205,7 @@ public class KafkaConsumerService {
                     .orElse(0);
 
             VotingResponseDTO responseDTO = new VotingResponseDTO();
+            responseDTO.setVotingId(voting.getId());
             responseDTO.setTitle(voting.getTitle());
             responseDTO.setDescription(voting.getDescription());
             responseDTO.setCreatorId(voting.getCreatorId());
