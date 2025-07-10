@@ -30,27 +30,26 @@ public class VoteCastHandler {
 
         // Проверка существования голосования
         votingRepository.findById(request.getVotingId())
-            .orElseThrow(() -> new IllegalArgumentException("Голосование не найдено: " + request.getVotingId()));
+                .orElseThrow(() -> new IllegalArgumentException("Голосование не найдено: " + request.getVotingId()));
 
         // Проверка существования пользователя
         userRepository.findById(request.getVoterId())
-            .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден: " + request.getVoterId()));
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден: " + request.getVoterId()));
 
         // Проверка, не голосовал ли пользователь уже
-//        voteRepository.findById_VotingIdAndId_VoterId(request.getVotingId(), request.getVoterId())
-//            .ifPresent(vote -> {
-//                throw new IllegalStateException("Пользователь уже голосовал в этом голосовании: " + request.getVoterId());
-//            });
+        voteRepository.findById(new VoteId(request.getVotingId(), request.getVoterId()))
+                .ifPresent(vote -> {
+                    throw new IllegalStateException("Пользователь уже голосовал в этом голосовании: " + request.getVoterId());
+                });
 
         // Создание и сохранение голоса
         Vote vote = new Vote();
         vote.setId(new VoteId(request.getVotingId(), request.getVoterId()));
         vote.setOptionId(request.getOptionId());
-        vote.setTxHash(request.getTxHash());
         vote.setCreatedAt(ZonedDateTime.now());
 
         voteRepository.save(vote);
-        logger.info("Голос успешно сохранён: votingId={}, voterId={}, optionId={}", 
-            request.getVotingId(), request.getVoterId(), request.getOptionId());
+        logger.info("Голос успешно сохранён: votingId={}, voterId={}, optionId={}",
+                request.getVotingId(), request.getVoterId(), request.getOptionId());
     }
 }

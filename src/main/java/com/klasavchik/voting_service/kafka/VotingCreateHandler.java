@@ -26,6 +26,10 @@ public class VotingCreateHandler {
     public void handle(VotingCreateRequest request) {
         logger.info("Обработка нового голосования: {}", request.getId());
 
+        if (request.getStartDate() == null) {
+            throw new IllegalArgumentException("startDate не может быть null");
+        }
+
         Voting voting = new Voting();
         voting.setId(request.getId());
         voting.setTitle(request.getTitle());
@@ -34,15 +38,15 @@ public class VotingCreateHandler {
         voting.setPrivate(request.isPrivate());
         voting.setMinVotes(request.getMinVotes());
         voting.setEndDate(request.getEndDate());
-        voting.setCreationDate(ZonedDateTime.now());
+        voting.setStartDate(request.getStartDate()); // Устанавливаем startDate из запроса
+        voting.setCreationDate(ZonedDateTime.now()); // Устанавливаем дату создания сами
 
-        // Создаем новые опции голосования
         List<VotingOption> options = request.getOptions().stream()
                 .map(option -> {
                     VotingOption votingOption = new VotingOption();
                     votingOption.setId(new VotingOption.VotingOptionId(request.getId(), option.getOptionId()));
                     votingOption.setText(option.getText());
-                    votingOption.setVoting(voting); // Устанавливаем связь с голосованием
+                    votingOption.setVoting(voting);
                     return votingOption;
                 })
                 .collect(Collectors.toList());

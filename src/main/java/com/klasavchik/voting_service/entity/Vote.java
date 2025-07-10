@@ -47,9 +47,6 @@ public class Vote {
     @Column(name = "option_id", nullable = false)
     private short optionId;
 
-    @Column(name = "tx_hash", length = 66, nullable = false, unique = true)
-    private String txHash;
-
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ DEFAULT NOW()")
     private ZonedDateTime createdAt;
 

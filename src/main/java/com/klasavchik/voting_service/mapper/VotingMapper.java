@@ -20,7 +20,7 @@ public class VotingMapper {
         voting.setId(dto.getId());
         voting.setTitle(dto.getTitle());
         voting.setDescription(dto.getDescription());
-        voting.setCreator(creator);
+        voting.setCreatorId(dto.getCreatorId());
         voting.setPrivate(dto.isPrivate());
         voting.setMinVotes(dto.getMinVotes());
         voting.setEndDate(dto.getEndDate());

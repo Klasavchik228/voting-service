@@ -14,7 +14,6 @@ public class VotingCreateRequest {
     private boolean isPrivate;
     private int minVotes;
     private ZonedDateTime endDate;
-    private ZonedDateTime startDate; // Переименовано
-    private ZonedDateTime creationDate; // Новое поле
+    private ZonedDateTime startDate; // Обязательное поле
     private List<VotingOptionDTO> options;
 }
