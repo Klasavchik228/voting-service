@@ -13,15 +13,35 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Обработчик создания новых голосований на основе входящих сообщений.
+ * Преобразует запрос в сущность и сохраняет её с опциями.
+ *
+ * @author Андрей Бокарев
+ * @version 1.0
+ * @see VotingRepository
+ */
 @Component
 public class VotingCreateHandler {
     private static final Logger logger = LoggerFactory.getLogger(VotingCreateHandler.class);
     private final VotingRepository votingRepository;
 
+    /**
+     * Конструктор с инъекцией репозитория голосований.
+     *
+     * @param votingRepository Репозиторий для работы с голосованиями
+     */
     public VotingCreateHandler(VotingRepository votingRepository) {
         this.votingRepository = votingRepository;
     }
 
+    /**
+     * Обрабатывает запрос на создание нового голосования.
+     * Создаёт сущность Voting с опциями и сохраняет её в базе данных.
+     *
+     * @param request Объект запроса {@link VotingCreateRequest} с данными голосования
+     * @throws IllegalArgumentException если startDate отсутствует
+     */
     @Transactional
     public void handle(VotingCreateRequest request) {
         logger.info("Обработка нового голосования: {}", request.getId());

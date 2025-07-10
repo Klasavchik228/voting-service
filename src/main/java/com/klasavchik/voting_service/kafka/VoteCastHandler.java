@@ -12,6 +12,16 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Обработчик регистрации голосов на основе входящих сообщений.
+ * Проверяет существование голосования и пользователя, а также предотвращает повторное голосование.
+ *
+ * @author Андрей Бокарев
+ * @version 1.0
+ * @see VoteRepository
+ * @see VotingRepository
+ * @see UserRepository
+ */
 @Component
 public class VoteCastHandler {
     private static final Logger logger = LoggerFactory.getLogger(VoteCastHandler.class);
@@ -19,12 +29,27 @@ public class VoteCastHandler {
     private final VotingRepository votingRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Конструктор с инъекцией репозиториев.
+     *
+     * @param voteRepository   Репозиторий для работы с голосами
+     * @param votingRepository Репозиторий для работы с голосованиями
+     * @param userRepository   Репозиторий для работы с пользователями
+     */
     public VoteCastHandler(VoteRepository voteRepository, VotingRepository votingRepository, UserRepository userRepository) {
         this.voteRepository = voteRepository;
         this.votingRepository = votingRepository;
         this.userRepository = userRepository;
     }
 
+    /**
+     * Обрабатывает запрос на регистрацию голоса.
+     * Проверяет существование голосования и пользователя, предотвращает дубликаты голосов.
+     *
+     * @param request Объект запроса {@link VoteRequest} с данными голосования
+     * @throws IllegalArgumentException если голосование или пользователь не найдены
+     * @throws IllegalStateException    если пользователь уже голосовал
+     */
     public void handle(VoteRequest request) {
         logger.info("Обработка голоса для votingId: {}, voterId: {}", request.getVotingId(), request.getVoterId());
 

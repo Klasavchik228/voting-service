@@ -1,4 +1,4 @@
-package com.klasavchik.voting_service.kafka.consumer;
+package com.klasavchik.voting_service.kafka;
 
 import com.klasavchik.voting_service.dto.UserRequest;
 import com.klasavchik.voting_service.entity.User;
@@ -10,6 +10,14 @@ import org.springframework.stereotype.Component;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+/**
+ * Обработчик регистрации новых пользователей на основе входящих сообщений.
+ * Проверяет существование пользователя и регистрирует нового, если его нет.
+ *
+ * @author Андрей Бокарев
+ * @version 1.0
+ * @see UserRepository
+ */
 @Component
 public class UserRegistrationHandler {
 
@@ -17,10 +25,21 @@ public class UserRegistrationHandler {
 
     private final UserRepository userRepository;
 
+    /**
+     * Конструктор с инъекцией репозитория пользователей.
+     *
+     * @param userRepository Репозиторий для работы с пользователями
+     */
     public UserRegistrationHandler(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Обрабатывает запрос на регистрацию пользователя.
+     * Если пользователь с указанным ID не существует, создаёт нового и сохраняет его.
+     *
+     * @param request Объект запроса {@link UserRequest} с данными пользователя
+     */
     public void handle(UserRequest request) {
         logger.info("Обработка регистрации пользователя: {}", request);
 

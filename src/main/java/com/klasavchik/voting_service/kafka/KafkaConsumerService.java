@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.klasavchik.voting_service.dto.*;
 import com.klasavchik.voting_service.entity.Vote;
 import com.klasavchik.voting_service.entity.Voting;
+import com.klasavchik.voting_service.kafka.UserRegistrationHandler;
 import com.klasavchik.voting_service.repository.VoteRepository;
 import com.klasavchik.voting_service.repository.VotingRepository;
 import org.slf4j.Logger;
@@ -19,19 +20,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+        * Сервис для обработки входящих сообщений из Kafka и отправки ответов.
+        * Обрабатывает запросы на регистрацию пользователей, создание голосований, регистрацию голосов,
+        * получение истории голосований, списка всех голосований и голосований пользователя.
+        *
+        * @author Андрей Бокарев
+        * @version 1.0
+        * @see VotingRepository
+ * @see VoteRepository
+ * @see UserRegistrationHandler
+ * @see VotingCreateHandler
+ * @see VoteCastHandler
+ */
 @Service
 public class KafkaConsumerService {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-    private final com.klasavchik.voting_service.kafka.consumer.UserRegistrationHandler userRegistrationHandler;
+    private final UserRegistrationHandler userRegistrationHandler;
     private final VotingCreateHandler votingCreateHandler;
     private final VoteCastHandler voteCastHandler;
     private final VoteRepository voteRepository;
     private final VotingRepository votingRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public KafkaConsumerService(com.klasavchik.voting_service.kafka.consumer.UserRegistrationHandler userRegistrationHandler,
+    /**
+     * Конструктор сервиса с инъекцией зависимостей.
+     *
+     * @param userRegistrationHandler Обработчик регистрации пользователей
+     * @param votingCreateHandler     Обработчик создания голосований
+     * @param voteCastHandler         Обработчик регистрации голосов
+     * @param voteRepository          Репозиторий для работы с голосами
+     * @param votingRepository        Репозиторий для работы с голосованиями
+     * @param kafkaTemplate           Шаблон Kafka для отправки сообщений
+     */
+    public KafkaConsumerService(UserRegistrationHandler userRegistrationHandler,
                                 VotingCreateHandler votingCreateHandler,
                                 VoteCastHandler voteCastHandler,
                                 VoteRepository voteRepository,
@@ -45,6 +69,11 @@ public class KafkaConsumerService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+    /**
+     * Обрабатывает запрос на регистрацию нового пользователя из топика 'user-registrations'.
+     *
+     * @param message JSON-строка с данными запроса {@link UserRequest}
+     */
     @KafkaListener(topics = "user-registrations", groupId = "voting-group")
     public void listenForUserRegistration(String message) {
         try {
@@ -54,7 +83,11 @@ public class KafkaConsumerService {
             logger.error("Ошибка при обработке регистрации пользователя", e);
         }
     }
-
+    /**
+     * Обрабатывает запрос на создание нового голосования из топика 'voting-create'.
+     *
+     * @param message JSON-строка с данными запроса {@link VotingCreateRequest}
+     */
     @KafkaListener(topics = "voting-create", groupId = "voting-group")
     public void listenForVotingCreate(String message) {
         try {
@@ -66,7 +99,11 @@ public class KafkaConsumerService {
             logger.error("Ошибка при обработке голосования", e);
         }
     }
-
+    /**
+     * Обрабатывает запрос на регистрацию голоса из топика 'vote-cast'.
+     *
+     * @param message JSON-строка с данными запроса {@link VoteRequest}
+     */
     @KafkaListener(topics = "vote-cast", groupId = "voting-group")
     public void listenForVoteCast(String message) {
         try {
@@ -78,7 +115,13 @@ public class KafkaConsumerService {
             logger.error("Ошибка при обработке голоса", e);
         }
     }
-
+    /**
+     * Обрабатывает запрос истории голосований из топика 'vote-history-request'.
+     * Возвращает последние 30 голосов пользователя с информацией о голосовании.
+     *
+     * @param message JSON-строка с данными запроса {@link VoteHistoryRequest}
+     * @throws IllegalArgumentException если голосование не найдено
+     */
     @Transactional
     @KafkaListener(topics = "vote-history-request", groupId = "voting-group")
     public void listenForVoteHistoryRequest(String message) {
@@ -129,6 +172,13 @@ public class KafkaConsumerService {
         }
     }
 
+    /**
+     * Обрабатывает запрос информации о голосовании из топика 'voting-request'.
+     * Возвращает детали голосования, включая статистику голосов.
+     *
+     * @param message JSON-строка с данными запроса {@link VotingRequest}
+     * @throws IllegalArgumentException если голосование не найдено
+     */
     @Transactional
     @KafkaListener(topics = "voting-request", groupId = "voting-group")
     public void listenForVotingRequest(String message) {
@@ -179,6 +229,12 @@ public class KafkaConsumerService {
             logger.error("Ошибка при обработке запроса информации о голосовании", e);
         }
     }
+    /**
+     * Обрабатывает запрос списка всех голосований из топика 'trigger-all-votings'.
+     * Возвращает последние 15 голосований, отсортированных по дате создания.
+     *
+     * @param message Триггерное сообщение
+     */
     @KafkaListener(topics = "trigger-all-votings", groupId = "voting-group")
     @Transactional
     public void listenForTriggerAllVotings(String message) {
@@ -207,6 +263,12 @@ public class KafkaConsumerService {
             logger.error("Ошибка при обработке триггера для отправки всех голосований", e);
         }
     }
+    /**
+     * Обрабатывает запрос голосований пользователя из топика 'trigger-user-votings-request'.
+     * Возвращает последние 15 голосований, созданных пользователем.
+     *
+     * @param message JSON-строка с данными запроса {@link UserVotingsRequest}
+     */
     @Transactional
     @KafkaListener(topics = "trigger-user-votings-request", groupId = "voting-group")
     public void listenForUserVotingsRequest(String message) {
