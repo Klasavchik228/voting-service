@@ -21,4 +21,7 @@ public interface VoteRepository extends JpaRepository<Vote, VoteId> {
 
     @Query("SELECT v FROM Vote v JOIN FETCH v.voting WHERE v.id.voterId = ?1")
     List<Vote> findAllByVoterIdWithVoting(String voterId);
+
+    @Query("SELECT v FROM Vote v JOIN FETCH v.voting WHERE v.id.voterId = ?1 ORDER BY v.createdAt DESC LIMIT 30")
+    List<Vote> findLast30ByVoterIdWithVoting(String voterId);
 }

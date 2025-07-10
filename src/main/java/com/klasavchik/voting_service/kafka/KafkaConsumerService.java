@@ -3,6 +3,7 @@ package com.klasavchik.voting_service.kafka;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.klasavchik.voting_service.dto.*;
+import com.klasavchik.voting_service.entity.Vote;
 import com.klasavchik.voting_service.entity.Voting;
 import com.klasavchik.voting_service.repository.VoteRepository;
 import com.klasavchik.voting_service.repository.VotingRepository;
@@ -92,7 +93,10 @@ public class KafkaConsumerService {
                 votersCountMap.put((String) result[0], ((Number) result[1]).intValue()); // votingId, votersCount
             }
 
-            List<VotingHistoryDTO> history = voteRepository.findAllByVoterIdWithVoting(request.getUserId()).stream()
+            // Получаем последние 30 записей истории голосований для пользователя
+            List<Vote> votes = voteRepository.findLast30ByVoterIdWithVoting(request.getUserId());
+
+            List<VotingHistoryDTO> history = votes.stream()
                     .map(vote -> {
                         VotingHistoryDTO dto = new VotingHistoryDTO();
                         dto.setVotingId(vote.getId().getVotingId());
@@ -121,7 +125,7 @@ public class KafkaConsumerService {
 
             String responseJson = objectMapper.writeValueAsString(response);
             kafkaTemplate.send("vote-history-response", responseJson);
-            logger.info("Отправлен ответ с историей голосований: {}", responseJson);
+            logger.info("Отправлен ответ с историей голосований (последние 30): {}", responseJson);
         } catch (Exception e) {
             logger.error("Ошибка при обработке запроса истории голосований", e);
         }
